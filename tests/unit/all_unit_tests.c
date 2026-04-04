@@ -10,6 +10,7 @@ static void run_all_tests(void)
     RUN_TEST_GROUP(Grid);
     RUN_TEST_GROUP(Config);
     RUN_TEST_GROUP(MqttPublisher);
+    RUN_TEST_GROUP(SharedBuffer);
 }
 
 int main(int argc, const char *argv[])

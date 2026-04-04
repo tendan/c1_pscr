@@ -14,6 +14,8 @@ add_executable(unit_tests
         config/test_config_runner.c
         mqtt/test_mqtt_publisher.c
         mqtt/test_mqtt_publisher_runner.c
+        buffer/test_shared_buffer.c
+        buffer/test_shared_buffer_runner.c
         all_unit_tests.c
 )
 
