@@ -13,6 +13,8 @@ struct CalculatedWeatherData {
     float latitude;
     float longitude;
     float irradiance;
+    float wind_speed;
+    int16_t wind_degrees;
 };
 
 enum TransformResult {

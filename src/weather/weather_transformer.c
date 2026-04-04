@@ -49,6 +49,8 @@ enum TransformResult estimate_irradiance(const struct RawWeatherData *raw_weathe
     parsed_weather_data->longitude = raw_weather_data->longitude;
     parsed_weather_data->latitude = raw_weather_data->latitude;
     parsed_weather_data->temperature = raw_weather_data->temperature;
+    parsed_weather_data->wind_speed = raw_weather_data->wind_speed;
+    parsed_weather_data->wind_degrees = raw_weather_data->wind_degrees;
 
     // Jeśli cos_theta <= 0, słońce jest pod horyzontem (noc)
     if (cos_theta <= 0) {
