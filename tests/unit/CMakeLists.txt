@@ -12,6 +12,8 @@ add_executable(unit_tests
         weather/test_weather_serializer_runner.c
         config/test_config.c
         config/test_config_runner.c
+        mqtt/test_mqtt_publisher.c
+        mqtt/test_mqtt_publisher_runner.c
         all_unit_tests.c
 )
 
