@@ -15,6 +15,16 @@ static double to_rad(double deg)
 enum TransformResult estimate_irradiance(const struct RawWeatherData *raw_weather_data,
                                          struct CalculatedWeatherData *parsed_weather_data)
 {
+    /* Co jeśli raw_weather_data lub parsed_weather_data to NULL? */
+    if (raw_weather_data == NULL || parsed_weather_data == NULL) {
+        return TRANSFORM_INVALID_INPUT;
+    }
+
+    /* Co jeśli cloudiness poza zakresem 0-100? */
+    if (raw_weather_data->cloudiness < 0 || raw_weather_data->cloudiness > 100) {
+        return TRANSFORM_INVALID_INPUT;
+    }
+
     struct tm *t = gmtime(&raw_weather_data->unix_time);
 
     // 1. Dzień roku (d)
