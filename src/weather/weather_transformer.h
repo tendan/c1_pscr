@@ -6,6 +6,7 @@
 #define C1_WEATHER_TRANSFORMER_H
 
 #include "weather_client.h"
+#include "weather_parser.h"
 
 struct CalculatedWeatherData {
     float temperature;
@@ -20,6 +21,6 @@ enum TransformResult {
     TRANSFORM_OUT_OF_RANGE
 };
 
-enum TransformResult estimate_irradiance(struct RawWeatherData *raw_weather_data, struct CalculatedWeatherData *parsed_weather_data);
+enum TransformResult estimate_irradiance(const struct RawWeatherData *raw_weather_data, struct CalculatedWeatherData *parsed_weather_data);
 
 #endif //C1_WEATHER_TRANSFORMER_H

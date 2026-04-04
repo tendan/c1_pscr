@@ -4,12 +4,15 @@
 
 #ifndef C1_WEATHER_PARSER_H
 #define C1_WEATHER_PARSER_H
+#include <stddef.h>
+#include <stdint.h>
 
 struct RawWeatherData {
     float temperature;
     float latitude;
     float longitude;
-    float cloudiness;
+    int8_t cloudiness;
+    long unix_time;
 };
 
 enum ParseResult {
@@ -19,6 +22,6 @@ enum ParseResult {
     PARSE_BUFFER_EMPTY
 };
 
-enum ParseResult parse_weather_response(const char *response_buf, size_t buf_len, struct RawWeatherData *out);
+enum ParseResult parse_weather_response(const char *response_buf, struct RawWeatherData *out);
 
 #endif //C1_WEATHER_PARSER_H

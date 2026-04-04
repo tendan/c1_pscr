@@ -4,6 +4,9 @@
 
 #ifndef C1_WEATHER_CLIENT_H
 #define C1_WEATHER_CLIENT_H
+#include <stddef.h>
+
+#include "weather_parser.h"
 
 // Enums
 
@@ -29,16 +32,22 @@ enum UnitType {
     FAHRENHEIT,
 };
 
+typedef enum HttpResult (*http_fetch_fn)(
+    const char  *url,
+    char        *buf,
+    size_t       buf_len
+);
+
 // Structs
 
-struct HttpClientOps {
-
-};
+typedef struct {
+    http_fetch_fn fetch;
+} HttpClientOps;
 
 struct WeatherClientContext {
     char* endpoint;
     char* appid;
-    struct HttpClientOps client_ops;
+    HttpClientOps client_ops;
 };
 
 struct WeatherQueryParams {
@@ -47,7 +56,7 @@ struct WeatherQueryParams {
     enum UnitType unit_type;
 };
 
-enum WeatherDataResult receive_coordinates_weather_data(const struct WeatherClientContext *ctx, struct WeatherQueryParams params, struct RawWeatherData *raw_weather_data);
+enum WeatherDataResult receive_coordinates_weather_data(const struct WeatherClientContext *ctx, struct WeatherQueryParams *params, struct RawWeatherData *raw_weather_data);
 
 
 #endif //C1_WEATHER_CLIENT_H
