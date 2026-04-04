@@ -58,9 +58,9 @@ add_library(c1_lib STATIC
     src/config/config.c
     src/config/config.h
     src/weather/weather_serializer.c
-        src/mqtt/mqtt_publisher.c
-        src/mqtt/mqtt_publisher.h
-        #src/json_parser.c
+    src/mqtt/mqtt_publisher.c
+    src/buffer/shared_buffer.c
+    #src/json_parser.c
     #src/transformer.c
     #src/mqtt_publisher.c
     #src/c1.c
