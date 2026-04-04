@@ -27,6 +27,7 @@ TEST(WeatherClient, HappyPathReturnsReadOk)
         "{\"coord\":{\"lat\":52.2,\"lon\":21.0},"
         "\"main\":{\"temp\":21.5},"
         "\"clouds\":{\"all\":20},"
+        "\"wind\":{\"speed\": 2.57,\"deg\": 310},"
         "\"dt\":1700000000}"
     );
     mock_http_set_result(HTTP_OK);

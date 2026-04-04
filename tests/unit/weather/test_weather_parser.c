@@ -17,7 +17,7 @@ TEST_TEAR_DOWN(WeatherParser)
 
 TEST(WeatherParser, ParsesLatitudeCorrectly)
 {
-    const char *response_buf = "{\n\"coord\": {\n\"lon\": 19.94,\n\"lat\": 50.06\n},\n\"main\": {\n\"temp\": 9.48\n},\"clouds\": {\n\"all\": 0\n},\n\"dt\": 1775245710\n}";
+    const char *response_buf = "{\"coord\":{\"lon\":19.94,\"lat\":50.06},\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"clearsky\",\"icon\":\"01n\"}],\"base\":\"stations\",\"main\":{\"temp\":9.48,\"feels_like\":8.16,\"temp_min\":9.16,\"temp_max\":9.71,\"pressure\":1017,\"humidity\":22,\"sea_level\":1017,\"grnd_level\":986},\"visibility\":10000,\"wind\":{\"speed\":2.57,\"deg\":310},\"clouds\":{\"all\":0},\"dt\":1775245710,\"sys\":{\"type\":2,\"id\":2095241,\"country\":\"PL\",\"sunrise\":1775189575,\"sunset\":1775236433},\"timezone\":7200,\"id\":3085041,\"name\":\"Śródmieście\",\"cod\":200}";
     struct RawWeatherData out = {0};
     enum ParseResult result = parse_weather_response(response_buf, &out);
 
@@ -27,8 +27,7 @@ TEST(WeatherParser, ParsesLatitudeCorrectly)
 
 TEST(WeatherParser, ParsesLongitudeCorrectly)
 {
-    const char *response_buf = "{\n\"coord\": {\n\"lon\": 19.94,\n\"lat\": 50.06\n},\n\"main\": {\n\"temp\": 9.48\n},\"clouds\": {\n\"all\": 0\n},\n\"dt\": 1775245710\n}";
-    struct RawWeatherData out = {0};
+    const char *response_buf = "{\"coord\":{\"lon\":19.94,\"lat\":50.06},\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"clearsky\",\"icon\":\"01n\"}],\"base\":\"stations\",\"main\":{\"temp\":9.48,\"feels_like\":8.16,\"temp_min\":9.16,\"temp_max\":9.71,\"pressure\":1017,\"humidity\":22,\"sea_level\":1017,\"grnd_level\":986},\"visibility\":10000,\"wind\":{\"speed\":2.57,\"deg\":310},\"clouds\":{\"all\":0},\"dt\":1775245710,\"sys\":{\"type\":2,\"id\":2095241,\"country\":\"PL\",\"sunrise\":1775189575,\"sunset\":1775236433},\"timezone\":7200,\"id\":3085041,\"name\":\"Śródmieście\",\"cod\":200}";    struct RawWeatherData out = {0};
     enum ParseResult result = parse_weather_response(response_buf, &out);
 
     TEST_ASSERT_EQUAL(PARSE_OK, result);
@@ -43,6 +42,17 @@ TEST(WeatherParser, ParsesTemperatureCorrectly)
 
     TEST_ASSERT_EQUAL(PARSE_OK, result);
     TEST_ASSERT_EQUAL_FLOAT(9.48, out.temperature);
+}
+
+TEST(WeatherParser, ParsesWindCorrectly)
+{
+    const char *response_buf = "{\"coord\":{\"lon\":19.94,\"lat\":50.06},\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"clearsky\",\"icon\":\"01n\"}],\"base\":\"stations\",\"main\":{\"temp\":9.48,\"feels_like\":8.16,\"temp_min\":9.16,\"temp_max\":9.71,\"pressure\":1017,\"humidity\":22,\"sea_level\":1017,\"grnd_level\":986},\"visibility\":10000,\"wind\":{\"speed\":2.57,\"deg\":310},\"clouds\":{\"all\":0},\"dt\":1775245710,\"sys\":{\"type\":2,\"id\":2095241,\"country\":\"PL\",\"sunrise\":1775189575,\"sunset\":1775236433},\"timezone\":7200,\"id\":3085041,\"name\":\"Śródmieście\",\"cod\":200}";
+    struct RawWeatherData out = {0};
+    enum ParseResult result = parse_weather_response(response_buf, &out);
+
+    TEST_ASSERT_EQUAL(PARSE_OK, result);
+    TEST_ASSERT_EQUAL_FLOAT(2.57, out.wind_speed);
+    TEST_ASSERT_EQUAL_FLOAT(310, out.wind_degrees);
 }
 
 TEST(WeatherParser, ParsesCloudinessCorrectly)
