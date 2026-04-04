@@ -47,6 +47,7 @@ add_library(c1_lib STATIC
     src/weather/weather_parser.c
     src/weather/weather_transformer.c
     #src/json_parser.c
+        src/grid/grid.c
     #src/transformer.c
     #src/mqtt_publisher.c
     #src/c1.c
