@@ -29,19 +29,19 @@ enum ParseResult parse_weather_response(const char *response_buf, struct RawWeat
         goto parse_end;
     }
 
-    num_values = cJSON_GetObjectItemCaseSensitive(coord_part, "lat");
-    if (!cJSON_IsNumber(num_values) || !num_values->valuedouble) {
-        result = PARSE_MISSING_FIELD;
-        goto parse_end;
-    }
-    out->latitude = (float)num_values->valuedouble;
-
     num_values = cJSON_GetObjectItemCaseSensitive(coord_part, "lon");
     if (!cJSON_IsNumber(num_values)) {
         result = PARSE_MISSING_FIELD;
         goto parse_end;
     }
     out->longitude = (float)num_values->valuedouble;
+
+    num_values = cJSON_GetObjectItemCaseSensitive(coord_part, "lat");
+    if (!cJSON_IsNumber(num_values)) {
+        result = PARSE_MISSING_FIELD;
+        goto parse_end;
+    }
+    out->latitude = (float)num_values->valuedouble;
 
     const cJSON *main_part = cJSON_GetObjectItemCaseSensitive(full_json, "main");
     if (!cJSON_IsObject(main_part) || !cJSON_HasObjectItem(main_part, "temp")) {
@@ -54,6 +54,29 @@ enum ParseResult parse_weather_response(const char *response_buf, struct RawWeat
         goto parse_end;
     }
     out->temperature = (float)num_values->valuedouble;
+
+    const cJSON *wind_part = cJSON_GetObjectItemCaseSensitive(full_json, "wind");
+    if (!cJSON_IsObject(wind_part)) {
+        result = PARSE_MISSING_FIELD;
+        goto parse_end;
+    }
+    if (!cJSON_HasObjectItem(wind_part, "deg") || !cJSON_HasObjectItem(wind_part, "speed")) {
+        result = PARSE_MISSING_FIELD;
+        goto parse_end;
+    }
+    num_values = cJSON_GetObjectItemCaseSensitive(wind_part, "speed");
+    if (!cJSON_IsNumber(num_values)) {
+        result = PARSE_MISSING_FIELD;
+        goto parse_end;
+    }
+    out->wind_speed = (float)num_values->valuedouble;
+
+    num_values = cJSON_GetObjectItemCaseSensitive(wind_part, "deg");
+    if (!cJSON_IsNumber(num_values)) {
+        result = PARSE_MISSING_FIELD;
+        goto parse_end;
+    }
+    out->wind_degrees = (int16_t)num_values->valueint;
 
     const cJSON *clouds_part = cJSON_GetObjectItemCaseSensitive(full_json, "clouds");
 

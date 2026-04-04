@@ -12,6 +12,8 @@ struct RawWeatherData {
     float temperature;
     float latitude;
     float longitude;
+    float wind_speed;
+    int16_t wind_degrees;
     int8_t cloudiness;
     time_t unix_time;
 };
