@@ -38,6 +38,9 @@ target_compile_options(unity_fixture PRIVATE -w)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MOSQUITTO REQUIRED libmosquitto)
 
+# curl
+find_package(CURL REQUIRED)
+
 # Source files
 add_library(c1_lib STATIC
     src/weather/weather_client.c
@@ -55,6 +58,7 @@ target_link_libraries(c1_lib
     cjson
     ${MOSQUITTO_LIBRARIES}
     pthread
+    CURL::libcurl
 )
 target_include_directories(c1_lib PRIVATE
     ${MOSQUITTO_INCLUDE_DIRS}
