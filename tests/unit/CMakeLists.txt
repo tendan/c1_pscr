@@ -8,6 +8,8 @@ add_executable(unit_tests
         weather/test_weather_client_internal.c
         weather/test_weather_transformer.c
         weather/test_weather_transformer_runner.c
+        config/test_config.c
+        config/test_config_runner.c
         all_unit_tests.c
 )
 
