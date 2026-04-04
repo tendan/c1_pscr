@@ -20,6 +20,10 @@ target_compile_options(cjson PRIVATE -w)
 add_subdirectory(lib/unity)
 target_compile_options(unity PRIVATE -w)
 
+target_compile_definitions(unity PUBLIC
+        UNITY_INCLUDE_DOUBLE
+)
+
 add_library(unity_fixture STATIC
         lib/unity/extras/fixture/src/unity_fixture.c
         lib/unity/extras/memory/src/unity_memory.c
@@ -31,6 +35,10 @@ target_include_directories(unity_fixture PUBLIC
 )
 
 target_link_libraries(unity_fixture PUBLIC unity)
+
+target_compile_definitions(unity_fixture PUBLIC
+        UNITY_INCLUDE_DOUBLE
+)
 
 target_compile_options(unity_fixture PRIVATE -w)
 
