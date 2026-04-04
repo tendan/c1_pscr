@@ -1,0 +1,24 @@
+//
+// Created by tendan on 3.04.2026.
+//
+
+#ifndef C1_WEATHER_PARSER_H
+#define C1_WEATHER_PARSER_H
+
+struct RawWeatherData {
+    float temperature;
+    float latitude;
+    float longitude;
+    float cloudiness;
+};
+
+enum ParseResult {
+    PARSE_OK = 0,
+    PARSE_MISSING_FIELD = 1,
+    PARSE_MALFORMED,
+    PARSE_BUFFER_EMPTY
+};
+
+enum ParseResult parse_weather_response(const char *response_buf, size_t buf_len, struct RawWeatherData *out);
+
+#endif //C1_WEATHER_PARSER_H

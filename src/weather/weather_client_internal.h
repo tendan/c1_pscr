@@ -1,0 +1,8 @@
+//
+// Created by tendan on 4.04.2026.
+//
+
+#ifndef C1_WEATHER_CLIENT_INTERNAL_H
+#define C1_WEATHER_CLIENT_INTERNAL_H
+
+#endif //C1_WEATHER_CLIENT_INTERNAL_H

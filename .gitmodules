@@ -1,0 +1,6 @@
+[submodule "lib/unity"]
+	path = lib/unity
+	url = https://github.com/ThrowTheSwitch/Unity
+[submodule "lib/cjson"]
+	path = lib/cjson
+	url = https://github.com/DaveGamble/cJSON
