@@ -13,4 +13,5 @@ TEST_GROUP_RUNNER(WeatherTransformer)
     RUN_TEST_CASE(WeatherTransformer, WinterNoonIrradianceLowerThanSummerNoon);
     RUN_TEST_CASE(WeatherTransformer, OutputContainsInputCoordinates);
     RUN_TEST_CASE(WeatherTransformer, OutputContainsInputTemperature);
+    RUN_TEST_CASE(WeatherTransformer, OutputShouldIncludeNonTransformedValues);
 }

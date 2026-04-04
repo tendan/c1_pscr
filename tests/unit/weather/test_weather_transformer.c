@@ -19,11 +19,13 @@ TEST_GROUP(WeatherTransformer);
 TEST_SETUP(WeatherTransformer)
 {
     s_raw = (struct RawWeatherData){
-        .temperature = 20.0f,
-        .latitude    = 52.0f,
-        .longitude   = 21.0f,
-        .cloudiness  = 0,
-        .unix_time   = SUMMER_NOON_UTC
+        .temperature    = 20.0f,
+        .latitude       = 52.0f,
+        .longitude      = 21.0f,
+        .cloudiness     = 0,
+        .wind_speed     = 2.57,
+        .wind_degrees   = 310,
+        .unix_time      = SUMMER_NOON_UTC
     };
     s_out = (struct CalculatedWeatherData){0};
 }
@@ -133,4 +135,14 @@ TEST(WeatherTransformer, OutputContainsInputTemperature)
     TEST_ASSERT_EQUAL(TRANSFORM_OK,
         estimate_irradiance(&s_raw, &s_out));
     TEST_ASSERT_FLOAT_WITHIN(0.001f, s_raw.temperature, s_out.temperature);
+}
+
+TEST(WeatherTransformer, OutputShouldIncludeNonTransformedValues)
+{
+    estimate_irradiance(&s_raw, &s_out);
+    TEST_ASSERT_EQUAL_FLOAT(s_raw.latitude, s_out.latitude);
+    TEST_ASSERT_EQUAL_FLOAT(s_raw.longitude, s_out.longitude);
+    TEST_ASSERT_EQUAL_FLOAT(s_raw.temperature, s_out.temperature);
+    TEST_ASSERT_EQUAL_FLOAT(s_raw.wind_speed, s_out.wind_speed);
+    TEST_ASSERT_EQUAL_FLOAT(s_raw.wind_degrees, s_out.wind_degrees);
 }
