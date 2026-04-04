@@ -12,11 +12,6 @@ TEST_TEAR_DOWN(Grid)
 
 }
 
-TEST(Grid, ShouldFail)
-{
-    TEST_FAIL();
-}
-
 TEST(Grid, ShouldPass)
 {
     TEST_PASS();
