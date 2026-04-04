@@ -1,6 +1,6 @@
 add_executable(unit_tests
-        test_grid.c
-        test_grid_runner.c
+        grid/test_grid.c
+        grid/test_grid_runner.c
         weather/test_weather_client.c
         weather/test_weather_client_runner.c
         weather/test_weather_parser.c
