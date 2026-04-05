@@ -48,6 +48,7 @@ TEST(Config, LoadsHostCorrectly)
         "mqtt_host=localhost\n"
         "mqtt_port=1883\n"
         "mqtt_topic_prefix=agh/kse/c1/weather\n"
+        "appid=test\n"
     );
 
     struct AppConfig cfg = {0};
@@ -61,6 +62,7 @@ TEST(Config, LoadsPortCorrectly)
         "mqtt_host=localhost\n"
         "mqtt_port=1883\n"
         "mqtt_topic_prefix=agh/kse/c1/weather\n"
+        "appid=test\n"
     );
 
     struct AppConfig cfg = {0};
@@ -74,6 +76,7 @@ TEST(Config, LoadsTopicPrefixCorrectly)
         "mqtt_host=localhost\n"
         "mqtt_port=1883\n"
         "mqtt_topic_prefix=agh/kse/c1/weather\n"
+        "appid=test\n"
     );
 
     struct AppConfig cfg = {0};
@@ -89,6 +92,7 @@ TEST(Config, CommentsAndEmptyLinesAreIgnored)
         "mqtt_host=localhost\n"
         "mqtt_port=1883\n"
         "mqtt_topic_prefix=agh/kse/c1/weather\n"
+        "appid=test\n"
     );
 
     struct AppConfig cfg = {0};
@@ -102,6 +106,7 @@ TEST(Config, InvalidPortReturnsInvalidValue)
         "mqtt_host=localhost\n"
         "mqtt_port=99999\n"
         "mqtt_topic_prefix=agh/kse/c1/weather\n"
+        "appid=test\n"
     );
 
     struct AppConfig cfg = {0};
@@ -112,6 +117,34 @@ TEST(Config, InvalidPortReturnsInvalidValue)
 TEST(Config, MissingHostReturnsMissingKey)
 {
     write_conf(
+        "mqtt_port=1883\n"
+        "mqtt_topic_prefix=agh/kse/c1/weather\n"
+        "appid=test\n"
+    );
+
+    struct AppConfig cfg = {0};
+    TEST_ASSERT_EQUAL(CONFIG_ERR_MISSING_KEY,
+        config_load(TEST_CONF_PATH, &cfg));
+}
+
+TEST(Config, LoadsAppidCorrectly)
+{
+    write_conf(
+        "mqtt_host=localhost\n"
+        "mqtt_port=1883\n"
+        "mqtt_topic_prefix=agh/kse/c1/weather\n"
+        "appid=test_token_123\n"
+    );
+
+    struct AppConfig cfg = {0};
+    TEST_ASSERT_EQUAL(CONFIG_OK, config_load(TEST_CONF_PATH, &cfg));
+    TEST_ASSERT_EQUAL_STRING("test_token_123", cfg.appid);
+}
+
+TEST(Config, MissingAppidReturnsMissingKey)
+{
+    write_conf(
+        "mqtt_host=localhost\n"
         "mqtt_port=1883\n"
         "mqtt_topic_prefix=agh/kse/c1/weather\n"
     );

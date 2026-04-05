@@ -8,4 +8,6 @@ TEST_GROUP_RUNNER(Config)
     RUN_TEST_CASE(Config, CommentsAndEmptyLinesAreIgnored);
     RUN_TEST_CASE(Config, InvalidPortReturnsInvalidValue);
     RUN_TEST_CASE(Config, MissingHostReturnsMissingKey);
+    RUN_TEST_CASE(Config, LoadsAppidCorrectly);
+    RUN_TEST_CASE(Config, MissingAppidReturnsMissingKey);
 }
