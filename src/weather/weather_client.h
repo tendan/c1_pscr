@@ -67,5 +67,7 @@ enum WeatherDataResult receive_coordinates_weather_data(const struct WeatherClie
                                                         const struct WeatherQueryParams *params,
                                                         struct RawWeatherData *raw_weather_data);
 
+enum HttpResult curl_fetch(const char *url, char *buf, size_t buf_len);
+
 
 #endif //C1_WEATHER_CLIENT_H
