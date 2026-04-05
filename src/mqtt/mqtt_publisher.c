@@ -22,6 +22,13 @@ MqttResult mqtt_publisher_context_from_config(
     out->topic_prefix = config->mqtt_topic_prefix;
     out->ops          = *ops;
 
+    out->username = (config->mqtt_username[0] != '\0')
+        ? config->mqtt_username
+        : NULL;
+    out->password = (config->mqtt_password[0] != '\0')
+        ? config->mqtt_password
+        : NULL;
+
     return MQTT_OK;
 }
 
@@ -33,7 +40,13 @@ MqttResult mqtt_publisher_connect(
         return MQTT_ERR_NULL_INPUT;
     }
 
-    return ctx->ops.connect(ctx->host, ctx->port, client_handle);
+    return ctx->ops.connect(
+        ctx->host,
+        ctx->port,
+        ctx->username,
+        ctx->password,
+        client_handle
+    );
 }
 
 MqttResult mqtt_publisher_publish(
@@ -94,11 +107,23 @@ void mqtt_publisher_lib_cleanup(void)
 static MqttResult mosquitto_connect_impl(
     const char  *host,
     uint16_t     port,
+    const char  *username,
+    const char  *password,
     void       **client_handle)
 {
     struct mosquitto *mosq = mosquitto_new(NULL, true, NULL);
     if (mosq == NULL) {
         return MQTT_ERR_CONNECTION_FAILED;
+    }
+
+    /* Ustaw credentials jeśli podane */
+    if (username != NULL) {
+        int rc_auth = mosquitto_username_pw_set(
+            mosq, username, password);
+        if (rc_auth != MOSQ_ERR_SUCCESS) {
+            mosquitto_destroy(mosq);
+            return MQTT_ERR_AUTH_FAILED;
+        }
     }
 
     int rc = mosquitto_connect(mosq, host, (int)port, 60);

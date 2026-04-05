@@ -34,6 +34,12 @@ static ConfigResult parse_line(const char *line, struct AppConfig *out)
     } else if (strcmp(key, "appid") == 0) {
         strncpy(out->appid, value, CONFIG_APPID_MAX_LEN - 1);
         out->appid[CONFIG_APPID_MAX_LEN - 1] = '\0';
+    } else if (strcmp(key, "mqtt_username") == 0) {
+        strncpy(out->mqtt_username, value, CONFIG_USERNAME_MAX_LEN - 1);
+        out->mqtt_username[CONFIG_USERNAME_MAX_LEN - 1] = '\0';
+    } else if (strcmp(key, "mqtt_password") == 0) {
+        strncpy(out->mqtt_password, value, CONFIG_PASSWORD_MAX_LEN - 1);
+        out->mqtt_password[CONFIG_PASSWORD_MAX_LEN - 1] = '\0';
     } else {
         return CONFIG_ERR_MISSING_KEY;
     }
