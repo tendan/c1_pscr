@@ -22,4 +22,6 @@ TEST_GROUP_RUNNER(MqttPublisher)
     RUN_TEST_CASE(MqttPublisher, PublishPayloadIsValidJson);
     RUN_TEST_CASE(MqttPublisher, PublishCalledExactlyOnce);
     RUN_TEST_CASE(MqttPublisher, DisconnectCalledExactlyOnce);
+    RUN_TEST_CASE(MqttPublisher, ConnectWithCredentialsPropagatesUsername);
+    RUN_TEST_CASE(MqttPublisher, ConnectWithoutCredentialsPassesNullUsername);
 }

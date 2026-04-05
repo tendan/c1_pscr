@@ -175,3 +175,26 @@ TEST(MqttPublisher, DisconnectCalledExactlyOnce)
     mqtt_publisher_disconnect(&s_ctx, s_handle);
     TEST_ASSERT_EQUAL_INT(1, mock_mqtt_get_disconnect_call_count());
 }
+
+TEST(MqttPublisher, ConnectWithCredentialsPropagatesUsername)
+{
+    strncpy(s_config.mqtt_username, "testuser",
+        CONFIG_USERNAME_MAX_LEN - 1);
+    strncpy(s_config.mqtt_password, "testpass",
+        CONFIG_PASSWORD_MAX_LEN - 1);
+
+    mqtt_publisher_context_from_config(
+        &s_config, &MOCK_MQTT_OPS, &s_ctx);
+    mqtt_publisher_connect(&s_ctx, &s_handle);
+
+    TEST_ASSERT_EQUAL_STRING("testuser",
+        mock_mqtt_get_last_username());
+}
+
+TEST(MqttPublisher, ConnectWithoutCredentialsPassesNullUsername)
+{
+    /* s_config ma puste username z TEST_SETUP */
+    TEST_ASSERT_EQUAL(MQTT_OK,
+        mqtt_publisher_connect(&s_ctx, &s_handle));
+    TEST_ASSERT_EQUAL_STRING("", mock_mqtt_get_last_username());
+}
