@@ -21,6 +21,7 @@ static ConfigResult parse_line(const char *line, struct AppConfig *out)
 
     if (strcmp(key, "mqtt_host") == 0) {
         strncpy(out->mqtt_host, value, CONFIG_HOST_MAX_LEN - 1);
+        out->mqtt_host[CONFIG_HOST_MAX_LEN - 1] = '\0';
     } else if (strcmp(key, "mqtt_port") == 0) {
         int port = atoi(value);
         if (port <= 0 || port > 65535) {
@@ -29,8 +30,10 @@ static ConfigResult parse_line(const char *line, struct AppConfig *out)
         out->mqtt_port = (uint16_t)port;
     } else if (strcmp(key, "mqtt_topic_prefix") == 0) {
         strncpy(out->mqtt_topic_prefix, value, CONFIG_TOPIC_MAX_LEN - 1);
+        out->mqtt_topic_prefix[CONFIG_TOPIC_MAX_LEN - 1] = '\0';
     } else if (strcmp(key, "appid") == 0) {
         strncpy(out->appid, value, CONFIG_APPID_MAX_LEN - 1);
+        out->appid[CONFIG_APPID_MAX_LEN - 1] = '\0';
     } else {
         return CONFIG_ERR_MISSING_KEY;
     }
