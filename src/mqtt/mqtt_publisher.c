@@ -45,7 +45,6 @@ MqttResult mqtt_publisher_publish(
         return MQTT_ERR_NULL_INPUT;
     }
 
-    /* Budowanie topicu */
     char topic[TOPIC_BUFFER_SIZE];
     int written = snprintf(topic, sizeof(topic),
         "%s/%.2f/%.2f",
@@ -57,7 +56,6 @@ MqttResult mqtt_publisher_publish(
         return MQTT_ERR_PUBLISH_FAILED;
     }
 
-    /* Serializacja payloadu */
     char payload[PAYLOAD_BUFFER_SIZE];
     SerializeResult ser_result =
         serialize_weather_data(data, payload, sizeof(payload));
@@ -92,8 +90,6 @@ void mqtt_publisher_lib_cleanup(void)
 {
     mosquitto_lib_cleanup();
 }
-
-/* ── Implementacje ops ─────────────────────────────────────── */
 
 static MqttResult mosquitto_connect_impl(
     const char  *host,
@@ -131,12 +127,12 @@ static MqttResult mosquitto_publish_impl(
 
     int rc = mosquitto_publish(
         mosq,
-        NULL,                   /* message id — nie potrzebujemy */
+        NULL,                       /* message id */
         topic,
         (int)strlen(payload),
         payload,
         qos,
-        false                   /* retain */
+        true                   /* retain */
     );
 
     if (rc != MOSQ_ERR_SUCCESS) {
