@@ -2,3 +2,4 @@
 mqtt_host=192.168.1.100
 mqtt_port=1883
 mqtt_topic_prefix=agh/kse/c1/weather
+appid=token_open_weather_map

@@ -11,7 +11,6 @@ static ConfigResult parse_line(const char *line, struct AppConfig *out)
     char key[64]  = {0};
     char value[CONFIG_HOST_MAX_LEN] = {0};
 
-    /* Pomiń komentarze i puste linie */
     if (line[0] == '#' || line[0] == '\n' || line[0] == '\0') {
         return CONFIG_OK;
     }
@@ -30,6 +29,8 @@ static ConfigResult parse_line(const char *line, struct AppConfig *out)
         out->mqtt_port = (uint16_t)port;
     } else if (strcmp(key, "mqtt_topic_prefix") == 0) {
         strncpy(out->mqtt_topic_prefix, value, CONFIG_TOPIC_MAX_LEN - 1);
+    } else if (strcmp(key, "appid") == 0) {
+        strncpy(out->appid, value, CONFIG_APPID_MAX_LEN - 1);
     } else {
         return CONFIG_ERR_MISSING_KEY;
     }
@@ -54,7 +55,6 @@ ConfigResult config_load(const char *path, struct AppConfig *out)
     ConfigResult result = CONFIG_OK;
 
     while (fgets(line, sizeof(line), f) != NULL) {
-        /* Usuń newline */
         line[strcspn(line, "\n")] = '\0';
 
         result = parse_line(line, out);
@@ -66,7 +66,6 @@ ConfigResult config_load(const char *path, struct AppConfig *out)
 
     fclose(f);
 
-    /* Walidacja że wymagane pola zostały ustawione */
     if (out->mqtt_host[0] == '\0') {
         return CONFIG_ERR_MISSING_KEY;
     }
@@ -74,6 +73,9 @@ ConfigResult config_load(const char *path, struct AppConfig *out)
         return CONFIG_ERR_MISSING_KEY;
     }
     if (out->mqtt_topic_prefix[0] == '\0') {
+        return CONFIG_ERR_MISSING_KEY;
+    }
+    if (out->appid[0] == '\0') {
         return CONFIG_ERR_MISSING_KEY;
     }
 

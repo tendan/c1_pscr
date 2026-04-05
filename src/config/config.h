@@ -7,6 +7,7 @@
 
 #define CONFIG_HOST_MAX_LEN   256U
 #define CONFIG_TOPIC_MAX_LEN  256U
+#define CONFIG_APPID_MAX_LEN  64U
 #define CONFIG_PATH_DEFAULT   "/etc/pipeline/pipeline.conf"
 #include <stdint.h>
 
@@ -14,7 +15,7 @@ struct AppConfig {
     char     mqtt_host[CONFIG_HOST_MAX_LEN];
     uint16_t mqtt_port;
     char     mqtt_topic_prefix[CONFIG_TOPIC_MAX_LEN];
-    int      mqtt_qos;
+    char     appid[CONFIG_APPID_MAX_LEN];
 };
 
 typedef enum {
