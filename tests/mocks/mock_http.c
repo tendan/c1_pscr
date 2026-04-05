@@ -4,12 +4,15 @@
 
 #include "mock_http.h"
 
+#include <pthread.h>
 #include <string.h>
+#include <bits/pthreadtypes.h>
 
 static char s_response[4096];
 static enum HttpResult s_result;
 static char s_last_url[512];
 static int s_call_count;
+static pthread_mutex_t s_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void mock_http_set_response(const char *json_body)
 {
@@ -41,8 +44,10 @@ void mock_http_reset(void)
 
 enum HttpResult mock_fetch(const char *url, char *buf, size_t buf_len)
 {
+    pthread_mutex_lock(&s_mutex);
     strncpy(s_last_url, url, sizeof(s_last_url) - 1);
     s_call_count++;
+    pthread_mutex_unlock(&s_mutex);
 
     if (s_result == HTTP_OK) {
         strncpy(buf, s_response, buf_len - 1);

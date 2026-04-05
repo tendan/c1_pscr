@@ -20,6 +20,10 @@ target_compile_options(cjson PRIVATE -w)
 add_subdirectory(lib/unity)
 target_compile_options(unity PRIVATE -w)
 
+target_compile_definitions(unity PUBLIC
+        UNITY_INCLUDE_DOUBLE
+)
+
 add_library(unity_fixture STATIC
         lib/unity/extras/fixture/src/unity_fixture.c
         lib/unity/extras/memory/src/unity_memory.c
@@ -32,18 +36,32 @@ target_include_directories(unity_fixture PUBLIC
 
 target_link_libraries(unity_fixture PUBLIC unity)
 
+target_compile_definitions(unity_fixture PUBLIC
+        UNITY_INCLUDE_DOUBLE
+)
+
 target_compile_options(unity_fixture PRIVATE -w)
 
 # libmosquitto
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MOSQUITTO REQUIRED libmosquitto)
 
+# curl
+find_package(CURL REQUIRED)
+
 # Source files
 add_library(c1_lib STATIC
     src/weather/weather_client.c
     src/weather/weather_parser.c
     src/weather/weather_transformer.c
-    #src/json_parser.c
+    src/grid/grid.c
+    src/config/config.c
+    src/config/config.h
+    src/weather/weather_serializer.c
+    src/mqtt/mqtt_publisher.c
+    src/buffer/shared_buffer.c
+        src/pipeline/pipeline.c
+        #src/json_parser.c
     #src/transformer.c
     #src/mqtt_publisher.c
     #src/c1.c
@@ -55,6 +73,7 @@ target_link_libraries(c1_lib
     cjson
     ${MOSQUITTO_LIBRARIES}
     pthread
+    CURL::libcurl
 )
 target_include_directories(c1_lib PRIVATE
     ${MOSQUITTO_INCLUDE_DIRS}

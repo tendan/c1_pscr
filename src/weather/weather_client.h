@@ -16,7 +16,8 @@ enum HttpResult {
     HTTP_FORBIDDEN,
     HTTP_NOT_FOUND,
     HTTP_INTERNAL_SERVER_ERROR,
-    HTTP_TIMEOUT
+    HTTP_TIMEOUT,
+    HTTP_OTHER_ERROR
 };
 
 enum WeatherDataResult {
@@ -33,21 +34,27 @@ enum UnitType {
 };
 
 typedef enum HttpResult (*http_fetch_fn)(
-    const char  *url,
-    char        *buf,
-    size_t       buf_len
+    const char *url,
+    char *buf,
+    size_t buf_len
 );
+
+struct CurlWriteContext{
+    char   *buf;
+    size_t  buf_len;
+    size_t  written;
+};
 
 // Structs
 
-typedef struct {
+struct HttpClientOps{
     http_fetch_fn fetch;
-} HttpClientOps;
+};
 
 struct WeatherClientContext {
-    char* endpoint;
-    char* appid;
-    HttpClientOps client_ops;
+    const char *endpoint;
+    const char *appid;
+    struct HttpClientOps client_ops;
 };
 
 struct WeatherQueryParams {
@@ -56,7 +63,11 @@ struct WeatherQueryParams {
     enum UnitType unit_type;
 };
 
-enum WeatherDataResult receive_coordinates_weather_data(const struct WeatherClientContext *ctx, struct WeatherQueryParams *params, struct RawWeatherData *raw_weather_data);
+enum WeatherDataResult receive_coordinates_weather_data(const struct WeatherClientContext *ctx,
+                                                        const struct WeatherQueryParams *params,
+                                                        struct RawWeatherData *raw_weather_data);
+
+enum HttpResult curl_fetch(const char *url, char *buf, size_t buf_len);
 
 
 #endif //C1_WEATHER_CLIENT_H

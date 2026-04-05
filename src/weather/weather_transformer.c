@@ -15,6 +15,16 @@ static double to_rad(double deg)
 enum TransformResult estimate_irradiance(const struct RawWeatherData *raw_weather_data,
                                          struct CalculatedWeatherData *parsed_weather_data)
 {
+    /* Co jeśli raw_weather_data lub parsed_weather_data to NULL? */
+    if (raw_weather_data == NULL || parsed_weather_data == NULL) {
+        return TRANSFORM_INVALID_INPUT;
+    }
+
+    /* Co jeśli cloudiness poza zakresem 0-100? */
+    if (raw_weather_data->cloudiness < 0 || raw_weather_data->cloudiness > 100) {
+        return TRANSFORM_INVALID_INPUT;
+    }
+
     struct tm *t = gmtime(&raw_weather_data->unix_time);
 
     // 1. Dzień roku (d)
@@ -39,6 +49,8 @@ enum TransformResult estimate_irradiance(const struct RawWeatherData *raw_weathe
     parsed_weather_data->longitude = raw_weather_data->longitude;
     parsed_weather_data->latitude = raw_weather_data->latitude;
     parsed_weather_data->temperature = raw_weather_data->temperature;
+    parsed_weather_data->wind_speed = raw_weather_data->wind_speed;
+    parsed_weather_data->wind_degrees = raw_weather_data->wind_degrees;
 
     // Jeśli cos_theta <= 0, słońce jest pod horyzontem (noc)
     if (cos_theta <= 0) {

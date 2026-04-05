@@ -6,13 +6,16 @@
 #define C1_WEATHER_PARSER_H
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/time.h>
 
 struct RawWeatherData {
     float temperature;
     float latitude;
     float longitude;
+    float wind_speed;
+    int16_t wind_degrees;
     int8_t cloudiness;
-    long unix_time;
+    time_t unix_time;
 };
 
 enum ParseResult {
