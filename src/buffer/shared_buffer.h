@@ -4,6 +4,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include "weather/weather_transformer.h"
+#include "weather/weather_client.h"
 
 #define SHARED_BUFFER_TIMEOUT_S 5
 
@@ -17,23 +18,29 @@ typedef enum {
 
 typedef struct {
     struct CalculatedWeatherData data;
-    int                          valid;
-    sem_t                        sem_produced;
-    sem_t                        sem_consumed;
-    pthread_mutex_t              mutex;
+    int valid;
+    enum WeatherDataResult status;
+    sem_t sem_produced;
+    sem_t sem_consumed;
+    pthread_mutex_t mutex;
 } SharedBuffer;
 
 BufferResult shared_buffer_init(SharedBuffer *buf);
-void         shared_buffer_destroy(SharedBuffer *buf);
+
+void shared_buffer_destroy(SharedBuffer *buf);
 
 BufferResult shared_buffer_produce(
-    SharedBuffer                       *buf,
-    const struct CalculatedWeatherData *data
+    SharedBuffer *buf,
+    const struct CalculatedWeatherData *data,
+    int valid,
+    enum WeatherDataResult status
 );
 
 BufferResult shared_buffer_consume(
-    SharedBuffer               *buf,
-    struct CalculatedWeatherData *out
+    SharedBuffer *buf,
+    struct CalculatedWeatherData *out,
+    int *out_valid,
+    enum WeatherDataResult *out_status
 );
 
 #endif

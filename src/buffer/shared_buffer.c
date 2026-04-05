@@ -49,8 +49,10 @@ void shared_buffer_destroy(SharedBuffer *buf)
 }
 
 BufferResult shared_buffer_produce(
-    SharedBuffer                       *buf,
-    const struct CalculatedWeatherData *data)
+    SharedBuffer *buf,
+    const struct CalculatedWeatherData *data,
+    int valid,
+    enum WeatherDataResult status)
 {
     if (buf == NULL || data == NULL) {
         return BUFFER_ERR_NULL_INPUT;
@@ -61,13 +63,14 @@ BufferResult shared_buffer_produce(
 
     if (sem_timedwait(&buf->sem_consumed, &ts) != 0) {
         return (errno == ETIMEDOUT)
-            ? BUFFER_ERR_TIMEOUT
-            : BUFFER_ERR_INVALID_STATE;
+                   ? BUFFER_ERR_TIMEOUT
+                   : BUFFER_ERR_INVALID_STATE;
     }
 
     pthread_mutex_lock(&buf->mutex);
     memcpy(&buf->data, data, sizeof(struct CalculatedWeatherData));
-    buf->valid = 1;
+    buf->valid = valid;
+    buf->status = status;
     pthread_mutex_unlock(&buf->mutex);
 
     sem_post(&buf->sem_produced);
@@ -75,10 +78,13 @@ BufferResult shared_buffer_produce(
 }
 
 BufferResult shared_buffer_consume(
-    SharedBuffer                 *buf,
-    struct CalculatedWeatherData *out)
+    SharedBuffer *buf,
+    struct CalculatedWeatherData *out,
+    int *out_valid,
+    enum WeatherDataResult *out_status)
 {
-    if (buf == NULL || out == NULL) {
+    if (buf == NULL || out == NULL ||
+        out_valid == NULL || out_status == NULL) {
         return BUFFER_ERR_NULL_INPUT;
     }
 
@@ -87,12 +93,14 @@ BufferResult shared_buffer_consume(
 
     if (sem_timedwait(&buf->sem_produced, &ts) != 0) {
         return (errno == ETIMEDOUT)
-            ? BUFFER_ERR_TIMEOUT
-            : BUFFER_ERR_INVALID_STATE;
+                   ? BUFFER_ERR_TIMEOUT
+                   : BUFFER_ERR_INVALID_STATE;
     }
 
     pthread_mutex_lock(&buf->mutex);
     memcpy(out, &buf->data, sizeof(struct CalculatedWeatherData));
+    *out_valid = buf->valid;
+    *out_status = buf->status;
     buf->valid = 0;
     pthread_mutex_unlock(&buf->mutex);
 
