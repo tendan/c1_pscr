@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #define TEST_BROKER_HOST "localhost"
 #define TEST_BROKER_PORT 1884
@@ -55,14 +56,22 @@ TEST_SETUP(BufferToMqtt)
     mqtt_publisher_lib_init();
 
     strncpy(s_config.mqtt_host,
-            TEST_BROKER_HOST, CONFIG_HOST_MAX_LEN - 1);
+        TEST_BROKER_HOST, CONFIG_HOST_MAX_LEN - 1);
     snprintf(s_config.mqtt_topic_prefix,
-             CONFIG_TOPIC_MAX_LEN, "%s", TEST_TOPIC_PREFIX);
+        CONFIG_TOPIC_MAX_LEN, "%s", TEST_TOPIC_PREFIX);
     s_config.mqtt_port = TEST_BROKER_PORT;
 
     mqtt_publisher_context_from_config(
         &s_config, &MOSQUITTO_OPS, &s_mqtt_ctx);
     mqtt_publisher_connect(&s_mqtt_ctx, &s_mqtt_handle);
+
+    /* Wyczyść dokładny topic używany w teście ValidDataIsPublished */
+    system(
+        "mosquitto_pub -h localhost -p 1884"
+        " -t 'agh/kse/c1/weather/52.23/21.01'"
+        " -r -n 2>/dev/null"
+    );
+    usleep(200000);
 }
 
 TEST_TEAR_DOWN(BufferToMqtt)
@@ -74,11 +83,24 @@ TEST_TEAR_DOWN(BufferToMqtt)
 
 TEST(BufferToMqtt, ValidDataIsPublished)
 {
+    /* Subskrybent musi być gotowy PRZED publikacją */
+    /* mosquitto_sub z retain lub użyj pipe */
     SenderArgs args = {
         .mqtt_ctx = &s_mqtt_ctx,
         .mqtt_handle = s_mqtt_handle,
         .buffer = &s_buffer
     };
+
+    /* Uruchom subskrybenta w tle przez pipe */
+    FILE *sub = popen(
+        "mosquitto_sub -h localhost -p 1884"
+        " -t 'agh/kse/c1/weather/#' -C 1 -W 5 2>/dev/null",
+        "r"
+    );
+    TEST_ASSERT_NOT_NULL(sub);
+
+    /* Małe opóźnienie żeby subskrybent zdążył się połączyć */
+    usleep(200000); /* 200ms */
 
     shared_buffer_produce(&s_buffer, &s_data, 1, READ_OK);
 
@@ -86,12 +108,13 @@ TEST(BufferToMqtt, ValidDataIsPublished)
     pthread_create(&tid, NULL, integration_sender, &args);
     pthread_join(tid, NULL);
 
-    /* Weryfikacja przez mosquitto_sub w osobnym procesie */
-    int rc = system(
-        "mosquitto_sub -h localhost -p 1884"
-        " -t 'agh/kse/c1/weather/#' -C 1 -W 3 > /dev/null 2>&1"
-    );
-    TEST_ASSERT_EQUAL_INT(0, rc);
+    /* Czytaj wynik */
+    char line[512] = {0};
+    fgets(line, sizeof(line), sub);
+    int rc = pclose(sub);
+
+    TEST_ASSERT_GREATER_THAN(0, strlen(line));
+    (void) rc;
 }
 
 TEST(BufferToMqtt, InvalidDataIsNotPublished)
@@ -108,7 +131,6 @@ TEST(BufferToMqtt, InvalidDataIsNotPublished)
     pthread_create(&tid, NULL, integration_sender, &args);
     pthread_join(tid, NULL);
 
-    /* Mosquitto_sub powinien wygasnąć bez odebrania wiadomości */
     int rc = system(
         "mosquitto_sub -h localhost -p 1884"
         " -t 'agh/kse/c1/weather/#' -C 1 -W 2 > /dev/null 2>&1"
