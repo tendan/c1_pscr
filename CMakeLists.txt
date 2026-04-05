@@ -60,7 +60,8 @@ add_library(c1_lib STATIC
     src/weather/weather_serializer.c
     src/mqtt/mqtt_publisher.c
     src/buffer/shared_buffer.c
-    #src/json_parser.c
+        src/pipeline/pipeline.c
+        #src/json_parser.c
     #src/transformer.c
     #src/mqtt_publisher.c
     #src/c1.c
