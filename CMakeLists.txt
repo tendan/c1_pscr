@@ -6,8 +6,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Flagi kompilacji
 add_compile_options(
-    -Wall -Wextra -Wpedantic
-    -Wno-unused-parameter
+        -Wall -Wextra -Wpedantic
+        -Wno-unused-parameter
 )
 
 # cJSON
@@ -32,6 +32,7 @@ add_library(unity_fixture STATIC
 target_include_directories(unity_fixture PUBLIC
         lib/unity/extras/fixture/src
         lib/unity/extras/memory/src
+        lib/
 )
 
 target_link_libraries(unity_fixture PUBLIC unity)
@@ -51,44 +52,47 @@ find_package(CURL REQUIRED)
 
 # Source files
 add_library(c1_lib STATIC
-    src/weather/weather_client.c
-    src/weather/weather_parser.c
-    src/weather/weather_transformer.c
-    src/grid/grid.c
-    src/config/config.c
-    src/config/config.h
-    src/weather/weather_serializer.c
-    src/mqtt/mqtt_publisher.c
-    src/buffer/shared_buffer.c
-    src/pipeline/pipeline.c
-    src/logger/logger.c
+        src/weather/weather_client.c
+        src/weather/weather_parser.c
+        src/weather/weather_transformer.c
+        src/grid/grid.c
+        src/config/config.c
+        src/config/config.h
+        src/weather/weather_serializer.c
+        src/mqtt/mqtt_publisher.c
+        src/buffer/shared_buffer.c
+        src/pipeline/pipeline.c
+        src/logger/logger.c
         #src/json_parser.c
-    #src/transformer.c
-    #src/mqtt_publisher.c
-    #src/c1.c
+        #src/transformer.c
+        #src/mqtt_publisher.c
+        #src/c1.c
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(c1_lib PRIVATE
             LOG_LEVEL=0    # LOG_LEVEL_DEBUG
     )
-else()
+else ()
     target_compile_definitions(c1_lib PRIVATE
             LOG_LEVEL=2    # LOG_LEVEL_INFO
     )
-endif()
+endif ()
 
 target_include_directories(c1_lib PUBLIC
-    src/
-)
-target_link_libraries(c1_lib
-    cjson
-    ${MOSQUITTO_LIBRARIES}
-    pthread
-    CURL::libcurl
+        src/
 )
 target_include_directories(c1_lib PRIVATE
-    ${MOSQUITTO_INCLUDE_DIRS}
+        lib/
+)
+target_link_libraries(c1_lib
+        cjson
+        ${MOSQUITTO_LIBRARIES}
+        pthread
+        CURL::libcurl
+)
+target_include_directories(c1_lib PRIVATE
+        ${MOSQUITTO_INCLUDE_DIRS}
 )
 
 # Executable

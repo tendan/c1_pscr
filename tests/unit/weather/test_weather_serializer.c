@@ -3,7 +3,7 @@
 #include "weather/weather_serializer.h"
 #include "weather/weather_transformer.h"
 
-#include "cjson/cJSON.h"
+#include <cjson/cJSON.h>
 #include <string.h>
 
 static struct CalculatedWeatherData s_data;
