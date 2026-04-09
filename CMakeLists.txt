@@ -81,7 +81,8 @@ endif ()
 target_include_directories(c1_lib PUBLIC
         src/
 )
-target_include_directories(c1_lib PRIVATE
+# Add cJSON to include path as "cjson/cJSON.h"
+target_include_directories(c1_lib PUBLIC
         lib/
 )
 target_link_libraries(c1_lib
