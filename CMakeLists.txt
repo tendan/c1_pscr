@@ -32,7 +32,6 @@ add_library(unity_fixture STATIC
 target_include_directories(unity_fixture PUBLIC
         lib/unity/extras/fixture/src
         lib/unity/extras/memory/src
-        lib/
 )
 
 target_link_libraries(unity_fixture PUBLIC unity)

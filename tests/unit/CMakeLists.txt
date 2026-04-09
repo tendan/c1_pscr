@@ -21,6 +21,10 @@ add_executable(unit_tests
         all_unit_tests.c
 )
 
+target_include_directories(unit_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/lib
+)
+
 target_link_libraries(unit_tests
         unity_fixture
         c1_lib
