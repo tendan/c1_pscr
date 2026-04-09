@@ -31,4 +31,32 @@ target_link_libraries(unit_tests
         test_mocks
 )
 
+if(VALGRIND_EXECUTABLE)
+    add_custom_target(valgrind
+            COMMAND ${VALGRIND_EXECUTABLE}
+            --error-exitcode=1
+            --leak-check=full
+            --track-origins=yes
+            --show-leak-kinds=all
+            --errors-for-leak-kinds=all
+            --suppressions=${CMAKE_SOURCE_DIR}/tools/valgrind.supp
+            --log-file=${CMAKE_BINARY_DIR}/valgrind-report.txt
+            $<TARGET_FILE:unit_tests> -v
+            DEPENDS unit_tests
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMENT "Running Valgrind on unit tests..."
+            VERBATIM
+    )
+
+    add_custom_target(valgrind-report
+            COMMAND cat ${CMAKE_BINARY_DIR}/valgrind-report.txt
+            DEPENDS valgrind
+            COMMENT "Valgrind report:"
+    )
+endif()
+
 add_test(NAME unit_tests COMMAND unit_tests)
+
+set_tests_properties(unit_tests PROPERTIES
+        LABELS "unit"
+)
