@@ -22,7 +22,6 @@ typedef struct {
     enum WeatherDataResult status;
     sem_t sem_produced;
     sem_t sem_consumed;
-    pthread_mutex_t mutex;
 } SharedBuffer;
 
 BufferResult shared_buffer_init(SharedBuffer *buf);
