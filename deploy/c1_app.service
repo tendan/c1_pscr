@@ -1,0 +1,17 @@
+[Unit]
+Description=REST to MQTT Pipeline C1
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=c1
+Group=c1
+ExecStart=/home/tendan/c1_app
+EnvironmentFile=/etc/c1/c1_app.conf
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=c1_app
+
+[Install]
+WantedBy=multi-user.target

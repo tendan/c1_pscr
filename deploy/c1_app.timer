@@ -1,0 +1,11 @@
+[Unit]
+Description=Run C1 every hour
+Requires=c1_app.service
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+#RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target

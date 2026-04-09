@@ -27,12 +27,6 @@ BufferResult shared_buffer_init(SharedBuffer *buf)
         return BUFFER_ERR_SEM_INIT_FAILED;
     }
 
-    if (pthread_mutex_init(&buf->mutex, NULL) != 0) {
-        sem_destroy(&buf->sem_produced);
-        sem_destroy(&buf->sem_consumed);
-        return BUFFER_ERR_SEM_INIT_FAILED;
-    }
-
     return BUFFER_OK;
 }
 
@@ -44,7 +38,6 @@ void shared_buffer_destroy(SharedBuffer *buf)
 
     sem_destroy(&buf->sem_produced);
     sem_destroy(&buf->sem_consumed);
-    pthread_mutex_destroy(&buf->mutex);
     memset(buf, 0, sizeof(SharedBuffer));
 }
 
@@ -67,11 +60,9 @@ BufferResult shared_buffer_produce(
                    : BUFFER_ERR_INVALID_STATE;
     }
 
-    pthread_mutex_lock(&buf->mutex);
     memcpy(&buf->data, data, sizeof(struct CalculatedWeatherData));
     buf->valid = valid;
     buf->status = status;
-    pthread_mutex_unlock(&buf->mutex);
 
     sem_post(&buf->sem_produced);
     return BUFFER_OK;
@@ -97,12 +88,10 @@ BufferResult shared_buffer_consume(
                    : BUFFER_ERR_INVALID_STATE;
     }
 
-    pthread_mutex_lock(&buf->mutex);
     memcpy(out, &buf->data, sizeof(struct CalculatedWeatherData));
     *out_valid = buf->valid;
     *out_status = buf->status;
     buf->valid = 0;
-    pthread_mutex_unlock(&buf->mutex);
 
     sem_post(&buf->sem_consumed);
     return BUFFER_OK;

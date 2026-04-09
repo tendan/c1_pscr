@@ -60,12 +60,24 @@ add_library(c1_lib STATIC
     src/weather/weather_serializer.c
     src/mqtt/mqtt_publisher.c
     src/buffer/shared_buffer.c
-        src/pipeline/pipeline.c
+    src/pipeline/pipeline.c
+    src/logger/logger.c
         #src/json_parser.c
     #src/transformer.c
     #src/mqtt_publisher.c
     #src/c1.c
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(c1_lib PRIVATE
+            LOG_LEVEL=0    # LOG_LEVEL_DEBUG
+    )
+else()
+    target_compile_definitions(c1_lib PRIVATE
+            LOG_LEVEL=2    # LOG_LEVEL_INFO
+    )
+endif()
+
 target_include_directories(c1_lib PUBLIC
     src/
 )
