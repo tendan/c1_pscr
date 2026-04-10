@@ -8,6 +8,7 @@
 #include "grid/grid_loader.h"
 
 #define PIPELINE_MAX_RETRIES 3
+#define PIPELINE_THREAD_COUNT 10
 
 typedef enum {
     PIPELINE_OK = 0,
@@ -18,20 +19,24 @@ typedef enum {
 
 typedef struct {
     const struct WeatherClientContext *weather_ctx;
-    struct MqttPublisherContext       *mqtt_ctx;
-    void                              *mqtt_handle;
-    GridPointArray                    *grid_point_array;
+    struct MqttPublisherContext *mqtt_ctx;
+    void *mqtt_handle;
+    GridPointArray *grid_point_array;
 } PipelineContext;
 
 typedef struct {
-    const PipelineContext      *pipeline_ctx;
-    struct WeatherQueryParams   params;
-    SharedBuffer                buffer;
-    int                         thread_id;
+    const PipelineContext *pipeline_ctx;
+    struct WeatherQueryParams params;
+    SharedBuffer buffer;
+    int thread_id;
+    size_t point_offset;
+    size_t point_count;
 } PipelineTaskContext;
 
 PipelineResult pipeline_init(PipelineContext *ctx);
+
 PipelineResult pipeline_run(const PipelineContext *ctx);
-void           pipeline_cleanup(PipelineContext *ctx);
+
+void pipeline_cleanup(PipelineContext *ctx);
 
 #endif
