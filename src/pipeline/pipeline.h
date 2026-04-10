@@ -5,6 +5,7 @@
 #include "mqtt/mqtt_publisher.h"
 #include "buffer/shared_buffer.h"
 #include "grid/grid.h"
+#include "grid/grid_loader.h"
 
 #define PIPELINE_MAX_RETRIES 3
 
@@ -19,6 +20,7 @@ typedef struct {
     const struct WeatherClientContext *weather_ctx;
     struct MqttPublisherContext       *mqtt_ctx;
     void                              *mqtt_handle;
+    GridPointArray                    *grid_point_array;
 } PipelineContext;
 
 typedef struct {
