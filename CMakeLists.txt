@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(c1 C)
 
+enable_testing()
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
@@ -100,5 +102,4 @@ add_executable(c1_app src/main.c)
 target_link_libraries(c1_app c1_lib)
 
 # Tests
-enable_testing()
 add_subdirectory(tests)
