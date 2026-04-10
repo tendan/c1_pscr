@@ -17,56 +17,64 @@ static int is_comment_or_empty(const char *line)
 }
 
 static int parse_csv_line(
-    const char       *line,
-    size_t            line_number,
+    const char *line,
+    size_t line_number,
     struct GridPoint *out)
 {
-    char  city[CSV_CITY_MAX_LEN] = {0};
-    float lat  = 0.0f;
-    float lon  = 0.0f;
+    float lat = 0.0f;
+    float lon = 0.0f;
 
-    /* Format: city,latitude,longitude */
-    if (sscanf(line, "%63[^,],%f,%f", city, &lat, &lon) != 3) {
+    const char *first_comma = strchr(line, ',');
+    if (first_comma == NULL) {
         log_message(LEVEL_WARN, "grid_loader: invalid line %zu — skipping: %s",
-            line_number, line);
-        return 0;
+                    line_number, line);
+        return -1;
     }
 
-    /* Walidacja zakresu dla Polski */
+    const char *second_comma = strchr(first_comma + 1, ',');
+    if (second_comma == NULL) {
+        log_message(LEVEL_WARN, "grid_loader: invalid line %zu — skipping: %s",
+                    line_number, line);
+        return -1;
+    }
+
+    if (sscanf(second_comma + 1, "%f", &lon) != 1 ||
+        sscanf(first_comma + 1, "%f", &lat) != 1) {
+        log_message(LEVEL_WARN, "grid_loader: invalid coordinates line %zu — skipping",
+                    line_number);
+        return -1;
+    }
+
     if (lat < 49.0f || lat > 54.9f) {
-        log_message(LEVEL_WARN, "grid_loader: line %zu latitude %.2f out of Poland bounds"
-            " — skipping",
-            line_number, (double)lat);
-        return 0;
+        log_message(LEVEL_WARN, "grid_loader: line %zu latitude %.2f out of bounds"
+                    " — skipping", line_number, (double) lat);
+        return -1;
     }
 
     if (lon < 14.1f || lon > 24.2f) {
-        log_message(LEVEL_WARN, "grid_loader: line %zu longitude %.2f out of Poland bounds"
-            " — skipping",
-            line_number, (double)lon);
-        return 0;
+        log_message(LEVEL_WARN, "grid_loader: line %zu longitude %.2f out of bounds"
+                    " — skipping", line_number, (double) lon);
+        return -1;
     }
 
-    out->latitude  = lat;
+    out->latitude = lat;
     out->longitude = lon;
-    out->city_name = NULL;    /* city_name jest const char* — patrz uwaga */
 
-    /* Skopiuj nazwę miasta do statycznego bufora */
-    static char city_names[GRID_MAX_POINTS][CSV_CITY_MAX_LEN];
-    static size_t city_index = 0;
-
-    if (city_index < GRID_MAX_POINTS) {
-        strncpy(city_names[city_index], city, CSV_CITY_MAX_LEN - 1);
-        city_names[city_index][CSV_CITY_MAX_LEN - 1] = '\0';
-        out->city_name = city_names[city_index];
-        city_index++;
+    size_t city_len = (size_t) (first_comma - line);
+    if (city_len >= GRID_CITY_NAME_MAX_LEN) {
+        city_len = GRID_CITY_NAME_MAX_LEN - 1;
+        log_message(LEVEL_WARN, "grid_loader: line %zu city name truncated to %u chars",
+                    line_number, GRID_CITY_NAME_MAX_LEN - 1);
     }
 
-    return 1;
+    memcpy(out->city_name, line, city_len);
+    out->city_name[city_len] = '\0';
+
+    return 0;
 }
 
 GridLoadResult grid_load_from_file(
-    const char     *path,
+    const char *path,
     GridPointArray *out)
 {
     if (path == NULL || out == NULL) {
@@ -81,13 +89,12 @@ GridLoadResult grid_load_from_file(
 
     memset(out, 0, sizeof(GridPointArray));
 
-    char   line[LINE_BUFFER_SIZE];
+    char line[LINE_BUFFER_SIZE];
     size_t line_number = 0;
 
     while (fgets(line, sizeof(line), f) != NULL) {
         line_number++;
 
-        /* Usuń newline */
         line[strcspn(line, "\n")] = '\0';
 
         if (is_comment_or_empty(line)) {
@@ -96,12 +103,12 @@ GridLoadResult grid_load_from_file(
 
         if (out->count >= GRID_MAX_POINTS) {
             log_message(LEVEL_WARN, "grid_loader: reached max points (%u) — "
-                "remaining lines ignored", GRID_MAX_POINTS);
+                        "remaining lines ignored", GRID_MAX_POINTS);
             fclose(f);
             return GRID_LOAD_ERR_TOO_MANY_POINTS;
         }
 
-        if (parse_csv_line(line, line_number, &out->points[out->count])) {
+        if (parse_csv_line(line, line_number, &out->points[out->count]) == 0) {
             out->count++;
         }
     }
@@ -114,7 +121,7 @@ GridLoadResult grid_load_from_file(
     }
 
     log_message(LEVEL_INFO, "grid_loader: loaded %zu points from %s",
-        out->count, path);
+                out->count, path);
 
     return GRID_LOAD_OK;
 }
@@ -136,5 +143,5 @@ void grid_load_fallback(GridPointArray *out)
     out->count = count;
 
     log_message(LEVEL_INFO, "grid_loader: using fallback with %zu hardcoded points",
-        out->count);
+                out->count);
 }

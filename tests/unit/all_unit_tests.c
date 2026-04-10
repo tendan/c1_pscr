@@ -13,6 +13,7 @@ static void run_all_tests(void)
     RUN_TEST_GROUP(MqttPublisher);
     RUN_TEST_GROUP(SharedBuffer);
     RUN_TEST_GROUP(Pipeline);
+    RUN_TEST_GROUP(MainHelper);
 }
 
 int main(int argc, const char *argv[])

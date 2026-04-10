@@ -66,6 +66,7 @@ add_library(c1_lib STATIC
         src/buffer/shared_buffer.c
         src/pipeline/pipeline.c
         src/logger/logger.c
+        src/main_helpers.c
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

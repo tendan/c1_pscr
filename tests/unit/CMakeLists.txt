@@ -3,6 +3,8 @@ add_executable(unit_tests
         grid/test_grid_runner.c
         grid/test_grid_loader.c
         grid/test_grid_loader_runner.c
+        helpers/test_main_helpers.c
+        helpers/test_main_helpers_runner.c
         weather/test_weather_client.c
         weather/test_weather_client_runner.c
         weather/test_weather_parser.c
@@ -21,6 +23,10 @@ add_executable(unit_tests
         pipeline/test_pipeline.c
         pipeline/test_pipeline_runner.c
         all_unit_tests.c
+)
+
+target_compile_definitions(unit_tests PRIVATE
+        PROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 )
 
 #target_include_directories(unit_tests PRIVATE

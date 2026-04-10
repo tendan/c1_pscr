@@ -8,6 +8,7 @@ TEST_GROUP_RUNNER(GridLoader)
     RUN_TEST_CASE(GridLoader, MissingFileReturnsFileNotFound);
     RUN_TEST_CASE(GridLoader, LoadsSinglePointCorrectly);
     RUN_TEST_CASE(GridLoader, LoadsCityNameCorrectly);
+    RUN_TEST_CASE(GridLoader, CityNameTruncatedToMaxLength);
     RUN_TEST_CASE(GridLoader, LoadsMultiplePointsCorrectly);
     RUN_TEST_CASE(GridLoader, CommentsAreIgnored);
     RUN_TEST_CASE(GridLoader, EmptyLinesAreIgnored);
