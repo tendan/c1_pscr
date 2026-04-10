@@ -75,10 +75,8 @@ TEST(GridLoader, CityNameTruncatedToMaxLength)
 
     grid_load_from_file(TEST_CSV_PATH, &s_out);
 
-    /* Punkt załadowany mimo długiej nazwy */
     TEST_ASSERT_EQUAL_size_t(1, s_out.count);
 
-    /* Nazwa obcięta do maksymalnej długości */
     TEST_ASSERT_EQUAL(
         GRID_CITY_NAME_MAX_LEN - 1,
         strlen(s_out.points[0].city_name)

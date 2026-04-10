@@ -5,9 +5,8 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=c1
-Group=c1
-ExecStart=/home/tendan/c1_app
+User=<user>
+ExecStart=/home/tendan/c1_app -g <path_to_grid.csv>
 EnvironmentFile=/etc/c1/c1_app.conf
 StandardOutput=journal
 StandardError=journal
