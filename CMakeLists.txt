@@ -57,6 +57,8 @@ add_library(c1_lib STATIC
         src/weather/weather_parser.c
         src/weather/weather_transformer.c
         src/grid/grid.c
+        src/grid/grid_loader.c
+        src/grid/grid_loader.h
         src/config/config.c
         src/config/config.h
         src/weather/weather_serializer.c
@@ -64,10 +66,6 @@ add_library(c1_lib STATIC
         src/buffer/shared_buffer.c
         src/pipeline/pipeline.c
         src/logger/logger.c
-        #src/json_parser.c
-        #src/transformer.c
-        #src/mqtt_publisher.c
-        #src/c1.c
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -96,6 +94,35 @@ target_link_libraries(c1_lib
 target_include_directories(c1_lib PRIVATE
         ${MOSQUITTO_INCLUDE_DIRS}
 )
+
+# ── Valgrind / CTest Memcheck ───────────────────────────────
+find_program(VALGRIND_EXECUTABLE valgrind)
+
+if(VALGRIND_EXECUTABLE)
+    message(STATUS "Valgrind found: ${VALGRIND_EXECUTABLE}")
+
+    set(MEMORYCHECK_COMMAND ${VALGRIND_EXECUTABLE})
+    set(MEMORYCHECK_COMMAND_OPTIONS
+            "--error-exitcode=1 \
+         --leak-check=full \
+         --track-origins=yes \
+         --show-leak-kinds=all \
+         --errors-for-leak-kinds=all \
+         --gen-suppressions=all"
+    )
+
+    # Plik supresji dla fałszywych alarmów
+    if(EXISTS ${CMAKE_SOURCE_DIR}/tools/valgrind.supp)
+        set(MEMORYCHECK_SUPPRESSIONS_FILE
+                ${CMAKE_SOURCE_DIR}/tools/valgrind.supp
+        )
+    endif()
+
+    include(CTest)
+
+else()
+    message(WARNING "Valgrind not found — memcheck disabled")
+endif()
 
 # Executable
 add_executable(c1_app src/main.c)
