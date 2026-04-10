@@ -1,13 +1,15 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "config/config.h"
-#include "mqtt/mqtt_publisher.h"
+
+#include "main_helpers.h"
 #include "grid/grid_loader.h"
 #include "logger/logger.h"
+#include "config/config.h"
+#include "weather/weather_client.h"
 #include "pipeline/pipeline.h"
 
-#define CONFIG_PATH      "/etc/c1/pipeline_app.conf"
+#define CONFIG_PATH "/etc/c1/c1_app.conf"
 
 static const struct option long_options[] = {
     {"grid", required_argument, NULL, 'g'},
@@ -26,14 +28,14 @@ static void print_usage(const char *prog)
 
 int main(int argc, char *argv[])
 {
-    const char *grid_path = NULL;
+    const char *cli_grid_path = NULL;
     int opt;
 
     while ((opt = getopt_long(argc, argv, "g:h",
                               long_options, NULL)) != -1) {
         switch (opt) {
             case 'g':
-                grid_path = optarg;
+                cli_grid_path = optarg;
                 break;
             case 'h':
                 print_usage(argv[0]);
@@ -44,7 +46,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    logger_init("pipeline_c1");
+    logger_init("c1_app");
 
     struct AppConfig config = {0};
     ConfigResult config_result = config_load(CONFIG_PATH, &config);
@@ -56,22 +58,16 @@ int main(int argc, char *argv[])
     }
 
     GridPointArray grid = {0};
+    const char *path = resolve_grid_path(
+        cli_grid_path,
+        DEFAULT_GRID_PATH
+    );
 
-    if (grid_path != NULL) {
-        GridLoadResult gr = grid_load_from_file(grid_path, &grid);
+    if (path != NULL) {
+        GridLoadResult gr = grid_load_from_file(path, &grid);
         if (gr != GRID_LOAD_OK) {
-            log_message(LEVEL_WARN, "Failed to load grid from CLI path %s"
-                        " — trying default", grid_path);
-            grid_path = NULL;
-        }
-    }
-
-    if (grid_path == NULL && grid.count == 0) {
-        GridLoadResult gr = grid_load_from_file(
-            DEFAULT_GRID_PATH, &grid);
-        if (gr != GRID_LOAD_OK) {
-            log_message(LEVEL_WARN, "Failed to load grid from %s"
-                        " — using fallback", DEFAULT_GRID_PATH);
+            log_message(LEVEL_WARN, "Failed to load grid from %s — using fallback",
+                        path);
         }
     }
 
@@ -101,7 +97,7 @@ int main(int argc, char *argv[])
         .weather_ctx = &weather_ctx,
         .mqtt_ctx = &mqtt_ctx,
         .mqtt_handle = NULL,
-        .grid_point_array = &grid, /* ← przekaż grid do pipeline */
+        .grid_point_array = &grid,
     };
 
     PipelineResult result = pipeline_init(&pipeline_ctx);
