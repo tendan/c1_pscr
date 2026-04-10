@@ -16,36 +16,24 @@ void logger_cleanup(void)
     closelog();
 }
 
-void logger_debug(const char *fmt, ...)
+static void logger_debug(const char *fmt, va_list args)
 {
-    va_list args;
-    va_start(args, fmt);
     vsyslog(LOG_DEBUG, fmt, args);
-    va_end(args);
 }
 
-void logger_info(const char *fmt, ...)
+static void logger_info(const char *fmt, va_list args)
 {
-    va_list args;
-    va_start(args, fmt);
     vsyslog(LOG_INFO, fmt, args);
-    va_end(args);
 }
 
-void logger_warn(const char *fmt, ...)
+static void logger_warn(const char *fmt, va_list args)
 {
-    va_list args;
-    va_start(args, fmt);
     vsyslog(LOG_WARNING, fmt, args);
-    va_end(args);
 }
 
-void logger_error(const char *fmt, ...)
+static void logger_error(const char *fmt, va_list args)
 {
-    va_list args;
-    va_start(args, fmt);
     vsyslog(LOG_ERR, fmt, args);
-    va_end(args);
 }
 
 void log_message(enum LogLevel log_level, const char *fmt, ...)

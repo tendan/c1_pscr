@@ -23,14 +23,6 @@ void logger_init(const char *ident);
 
 void logger_cleanup(void);
 
-void logger_debug(const char *fmt, ...);
-
-void logger_info(const char *fmt, ...);
-
-void logger_warn(const char *fmt, ...);
-
-void logger_error(const char *fmt, ...);
-
 void log_message(enum LogLevel log_level, const char *fmt, ...);
 
 #endif /* C1_LOGGER_H */
