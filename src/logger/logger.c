@@ -33,7 +33,14 @@ static void logger_warn(const char *fmt, va_list args)
 
 static void logger_error(const char *fmt, va_list args)
 {
-    vsyslog(LOG_ERR, fmt, args);
+    va_list args_copy;
+    va_copy(args_copy, args);
+
+    vfprintf(stderr, fmt, args);
+    fputc('\n', stderr);
+
+    vsyslog(LOG_ERR, fmt, args_copy);
+    va_end(args_copy);
 }
 
 void log_message(enum LogLevel log_level, const char *fmt, ...)
