@@ -48,7 +48,7 @@ TEST_SETUP(PipelineFull)
 
     /* Wyczyść retained messages ze wszystkich topiców siatki */
     for (size_t i = 0; i < grid_point_count(); i++) {
-        const struct GridPoint *p = grid_get_point(i);
+        const struct GridPoint *p = grid_get_fallback_point(i);
         char clear_cmd[256];
         snprintf(clear_cmd, sizeof(clear_cmd),
             "mosquitto_pub -h localhost -p 1884"
