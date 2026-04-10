@@ -18,6 +18,7 @@ static struct WeatherClientContext s_weather_ctx;
 static struct MqttPublisherContext s_mqtt_ctx;
 static struct AppConfig s_config;
 static PipelineContext s_pipeline_ctx;
+static GridPointArray s_grid;
 
 TEST_GROUP(PipelineFull);
 
@@ -28,6 +29,8 @@ TEST_SETUP(PipelineFull)
         .appid = FAKE_SERVER_APPID,
         .client_ops = {.fetch = curl_fetch}
     };
+
+    grid_load_fallback(&s_grid);
 
     strncpy(s_config.mqtt_host,
             TEST_BROKER_HOST, CONFIG_HOST_MAX_LEN - 1);
@@ -42,6 +45,7 @@ TEST_SETUP(PipelineFull)
         .weather_ctx = &s_weather_ctx,
         .mqtt_ctx = &s_mqtt_ctx,
         .mqtt_handle = NULL,
+        .grid_point_array = &s_grid,
     };
 
     pipeline_init(&s_pipeline_ctx);
@@ -90,7 +94,7 @@ TEST(PipelineFull, AllGridPointsPublished)
     }
     pclose(sub);
 
-    TEST_ASSERT_EQUAL_INT(GRID_POINT_COUNT, msg_count);
+    TEST_ASSERT_EQUAL_INT((int)s_pipeline_ctx.grid_point_array->count, msg_count);
 }
 
 TEST(PipelineFull, PublishedTopicsContainCoordinates)
