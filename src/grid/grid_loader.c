@@ -138,7 +138,7 @@ void grid_load_fallback(GridPointArray *out)
     }
 
     for (size_t i = 0; i < count; i++) {
-        out->points[i] = *grid_get_point(i);
+        out->points[i] = *grid_get_fallback_point(i);
     }
     out->count = count;
 
