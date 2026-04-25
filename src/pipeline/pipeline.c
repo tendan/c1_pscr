@@ -40,20 +40,20 @@ static void *reader_thread(void *arg)
             if (result == READ_OK) break;
             if (result == READ_FORBIDDEN) {
                 log_message(LEVEL_ERROR, "thread %d: token forbidden, aborting",
-                          ctx->thread_id);
+                            ctx->thread_id);
                 shared_buffer_produce(&ctx->buffer,
                                       &calc, 0, READ_FORBIDDEN);
                 return NULL;
             }
 
             log_message(LEVEL_WARN, "thread %d: timeout, retry %d/%d",
-                     ctx->thread_id, attempt + 1, PIPELINE_MAX_RETRIES);
+                        ctx->thread_id, attempt + 1, PIPELINE_MAX_RETRIES);
             sleep(1);
         }
 
         if (result != READ_OK) {
             log_message(LEVEL_WARN, "thread %d: all retries exhausted for point %zu",
-                     ctx->thread_id, ctx->point_offset + i);
+                        ctx->thread_id, ctx->point_offset + i);
             shared_buffer_produce(&ctx->buffer, &calc, 0, result);
             continue; /* ← przejdź do następnego punktu */
         }
@@ -83,13 +83,13 @@ static void *sender_thread(void *arg)
 
         if (br != BUFFER_OK) {
             log_message(LEVEL_WARN, "thread %d: buffer consume failed: %d",
-                     ctx->thread_id, br);
+                        ctx->thread_id, br);
             continue;
         }
 
         if (!valid) {
             log_message(LEVEL_WARN, "thread %d: data invalid (status=%d), skipping publish",
-                     ctx->thread_id, status);
+                        ctx->thread_id, status);
             continue;
         }
 
@@ -100,7 +100,7 @@ static void *sender_thread(void *arg)
 
         if (mr != MQTT_OK) {
             log_message(LEVEL_WARN, "thread %d: publish failed: %d",
-                     ctx->thread_id, mr);
+                        ctx->thread_id, mr);
         }
     }
 
@@ -127,26 +127,38 @@ PipelineResult pipeline_init(PipelineContext *ctx)
     return PIPELINE_OK;
 }
 
-PipelineResult pipeline_run(const PipelineContext *ctx)
+static void destroy_shared_buffer_tasks(PipelineTaskContext tasks[PIPELINE_THREAD_COUNT])
 {
-    if (ctx == NULL) {
-        return PIPELINE_ERR_NULL_INPUT;
+    for (size_t i = 0; i < PIPELINE_THREAD_COUNT; i++) {
+        shared_buffer_destroy(&tasks[i].buffer);
     }
+}
 
-    if (ctx->grid_point_array->count == 0) {
-        log_message(LEVEL_ERROR, "pipeline: no grid points to process");
-        return PIPELINE_ERR_INIT_FAILED;
+static void execute_pipeline_threads(pthread_t readers[PIPELINE_THREAD_COUNT], pthread_t senders[PIPELINE_THREAD_COUNT])
+{
+    for (size_t i = 0; i < PIPELINE_THREAD_COUNT; i++) {
+        pthread_join(readers[i], NULL);
+        pthread_join(senders[i], NULL);
     }
+}
 
-    PipelineTaskContext tasks[PIPELINE_THREAD_COUNT];
-    pthread_t readers[PIPELINE_THREAD_COUNT];
-    pthread_t senders[PIPELINE_THREAD_COUNT];
+static void create_pipeline_threads(PipelineTaskContext tasks[PIPELINE_THREAD_COUNT],
+                                    pthread_t readers[PIPELINE_THREAD_COUNT], pthread_t senders[PIPELINE_THREAD_COUNT])
+{
+    for (size_t i = 0; i < PIPELINE_THREAD_COUNT; i++) {
+        pthread_create(&senders[i], NULL, sender_thread, &tasks[i]);
+        pthread_create(&readers[i], NULL, reader_thread, &tasks[i]);
+    }
+}
 
+static PipelineResult assign_grid_points_to_threads(const PipelineContext *ctx,
+                                             PipelineTaskContext tasks[PIPELINE_THREAD_COUNT])
+{
     size_t base = ctx->grid_point_array->count / PIPELINE_THREAD_COUNT;
     size_t reste = ctx->grid_point_array->count % PIPELINE_THREAD_COUNT;
 
     log_message(LEVEL_INFO, "pipeline: %zu points, %d threads, base=%zu, reste=%zu",
-             ctx->grid_point_array->count, PIPELINE_THREAD_COUNT, base, reste);
+                ctx->grid_point_array->count, PIPELINE_THREAD_COUNT, base, reste);
 
 
     for (size_t i = 0; i < PIPELINE_THREAD_COUNT; i++) {
@@ -167,25 +179,34 @@ PipelineResult pipeline_run(const PipelineContext *ctx)
         }
 
         log_message(LEVEL_DEBUG, "pipeline: thread %zu → points [%zu, %zu)",
-                  i, offset, offset + base + extra);
+                    i, offset, offset + base + extra);
+    }
+    return PIPELINE_OK;
+}
+
+PipelineResult pipeline_run(const PipelineContext *ctx)
+{
+    if (ctx == NULL) {
+        return PIPELINE_ERR_NULL_INPUT;
     }
 
-    /* Start wątków */
-    for (size_t i = 0; i < PIPELINE_THREAD_COUNT; i++) {
-        pthread_create(&senders[i], NULL, sender_thread, &tasks[i]);
-        pthread_create(&readers[i], NULL, reader_thread, &tasks[i]);
+    if (ctx->grid_point_array->count == 0) {
+        log_message(LEVEL_ERROR, "pipeline: no grid points to process");
+        return PIPELINE_ERR_INIT_FAILED;
     }
 
-    /* Join */
-    for (size_t i = 0; i < PIPELINE_THREAD_COUNT; i++) {
-        pthread_join(readers[i], NULL);
-        pthread_join(senders[i], NULL);
-    }
+    PipelineTaskContext tasks[PIPELINE_THREAD_COUNT];
+    pthread_t readers[PIPELINE_THREAD_COUNT];
+    pthread_t senders[PIPELINE_THREAD_COUNT];
 
-    /* Cleanup */
-    for (size_t i = 0; i < PIPELINE_THREAD_COUNT; i++) {
-        shared_buffer_destroy(&tasks[i].buffer);
-    }
+    PipelineResult assignment_result = assign_grid_points_to_threads(ctx, tasks);
+    if (assignment_result != PIPELINE_OK) return assignment_result;
+
+    create_pipeline_threads(tasks, readers, senders);
+
+    execute_pipeline_threads(readers, senders);
+
+    destroy_shared_buffer_tasks(tasks);
 
     log_message(LEVEL_INFO, "pipeline: completed successfully");
     return PIPELINE_OK;
