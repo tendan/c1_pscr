@@ -26,25 +26,19 @@ static void print_usage(const char *prog)
             prog, DEFAULT_GRID_PATH);
 }
 
+enum OptionParseResult {
+    OPTION_OK = 0,
+    OPTION_HELP = 1,
+    OPTION_ERROR = 2,
+};
+
+static enum OptionParseResult option_parser(int argc, char *argv[], const char **cli_grid_path);
+
 int main(int argc, char *argv[])
 {
     const char *cli_grid_path = NULL;
-    int opt;
 
-    while ((opt = getopt_long(argc, argv, "g:h",
-                              long_options, NULL)) != -1) {
-        switch (opt) {
-            case 'g':
-                cli_grid_path = optarg;
-                break;
-            case 'h':
-                print_usage(argv[0]);
-                return EXIT_SUCCESS;
-            default:
-                print_usage(argv[0]);
-                return EXIT_FAILURE;
-        }
-    }
+    option_parser(argc, argv, &cli_grid_path);
 
     logger_init("c1_app");
 
@@ -118,4 +112,24 @@ int main(int argc, char *argv[])
     pipeline_cleanup(&pipeline_ctx);
     logger_cleanup();
     return EXIT_SUCCESS;
+}
+
+static enum OptionParseResult option_parser(int argc, char *argv[], const char **cli_grid_path)
+{
+    int opt;
+
+    while ((opt = getopt_long(argc, argv, "g:h",
+                              long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'g':
+                *cli_grid_path = optarg;
+                return OPTION_OK;
+            case 'h':
+                print_usage(argv[0]);
+                return OPTION_HELP;
+            default:
+                print_usage(argv[0]);
+                return OPTION_ERROR;
+        }
+    }
 }
